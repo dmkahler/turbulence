@@ -1,6 +1,7 @@
 # This code analyzes the data from the Nortek Vector ADV.
 
 library(dplyr)
+library(ggplot2)
 
 setwd("/Users/davidkahler/Documents/Hydrology_and_WRM/river_and_lake_mixing/ADV data/")
 pck = read.table("TESTDE02.pck", header = FALSE, sep = "", dec = ".")
@@ -47,9 +48,10 @@ sampling_rate = 64 # Hz, verify sampling rate in .hdr file under User setup
 
 # Data check
 max(dat$checksum)
-hist(dat$snr1)
-hist(dat$snr2)
-hist(dat$snr3)
+par(mfrow = c(3,1), mar = c(4,4,2,2)) # mfrow=c(nrows, ncols), https://www.statmethods.net/advgraphs/layout.html
+hist(dat$snr1, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 1", xlab = "", main = "")
+hist(dat$snr2, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 2", xlab = "", main = "")
+hist(dat$snr3, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 3", xlab = "Signal-to-Noise Ratio (dB)", main = "")
 
 datetime <- array(-9999, dim = c(nrow(sen),2)) # col 1: days (day 1 is 01 Jan 2020), col 2: seconds of the day
 u <- array(-9999, dim = c(nrow(sen),sampling_rate))
@@ -61,9 +63,15 @@ w_ave <- array(0, dim = c(nrow(sen),2))
 u_prime <- u
 v_prime <- v
 w_prime <- w
+uu <- array(-9999, dim = c(nrow(sen),1))
+vv <- uu
+ww <- uu
+uv <- uu
+uw <- uu
+vw <- uu
 for (i in 1:nrow(sen)) {
       datetime[i,1] <- ( as.numeric(as.Date(paste(sen$yea[i], sen$mon[i], sen$day[i], sep = " "), format = "%Y %m %d")) - as.numeric(as.Date("2019 12 31", format = "%Y %m %d")) )
-      datetime[i,2] <- sen$sec[i] + (sen$mnt[i]-1)*60 + (sen$hou[1]-1)*3600
+      datetime[i,2] <- sen$sec[i] + (sen$mnt[i]-1)*60 + (sen$hou[i]-1)*3600
       for (j in 1:sampling_rate) {
             dat_index <- (sampling_rate*(i-1)) + j
             if (is.na(dat$u[dat_index])==FALSE) {
@@ -81,15 +89,37 @@ for (i in 1:nrow(sen)) {
       u_ave[i,1] <- mean(u[i,])
       v_ave[i,1] <- mean(v[i,])
       w_ave[i,1] <- mean(w[i,])
-      for (j in 1:sampling_rate) {
-            if (u_ave[i,2]==sampling_rate) {
+      if (u_ave[i,2]==sampling_rate) {
+            for (j in 1:sampling_rate) {
                   u_prime[i,j] <- u[i,j] - u_ave[i,1]
                   v_prime[i,j] <- v[i,j] - v_ave[i,1]
                   w_prime[i,j] <- w[i,j] - w_ave[i,1]
             }
       }
+      if (u_ave[i,2]==sampling_rate) {
+            uu[i,1] <- mean((u_prime[i,]^2))
+            vv[i,1] <- mean((v_prime[i,]^2))
+            ww[i,1] <- mean((w_prime[i,]^2))
+            uv[i,1] <- mean((u_prime[i,]*v_prime[i,]))
+            uw[i,1] <- mean((u_prime[i,]*w_prime[i,]))
+            vw[i,1] <- mean((v_prime[i,]*w_prime[i,]))
+      }
 }
 
-plot(u_ave[,1], ylim = c(-0.5, 0.5), type = "l")
-plot(v_ave[,1], ylim = c(-0.5, 0.5), type = "l")
-plot(w_ave[,1], ylim = c(-0.5, 0.5), type = "l")
+par(mfrow = c(3,1), mar = c(4,4,2,2))
+plot(datetime[,2], u_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "u (m/s)", xlab = "")
+plot(datetime[,2], v_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "v (m/s)", xlab = "")
+plot(datetime[,2], w_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
+
+par(mfrow = c(3,1), mar = c(4,4,2,2))
+plot(datetime[,2], uu, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uu", xlab = "")
+plot(datetime[,2], vv, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "vv", xlab = "")
+plot(datetime[,2], ww, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "ww", xlab = "Time (s)")
+
+par(mfrow = c(3,1), mar = c(4,4,2,2))
+plot(datetime[,2], uv, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uv", xlab = "")
+plot(datetime[,2], uw, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uw", xlab = "")
+plot(datetime[,2], vw, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "vw", xlab = "Time (s)")
+
+
+
