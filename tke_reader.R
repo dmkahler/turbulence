@@ -4,8 +4,7 @@ library(dplyr)
 library(ggplot2)
 
 setwd("/Users/davidkahler/Documents/Hydrology_and_WRM/river_and_lake_mixing/ADV data/")
-pck = read.table("TESTDE02.pck", header = FALSE, sep = "", dec = ".")
-sen = read.table("TESTDE02.sen", header = FALSE, sep = "", dec = ".")
+sen = read.table("MON103.sen", header = FALSE, sep = "", dec = ".")
 sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6, err = V7, sta = V8, bat = V9, ssp = V10, hed = V11, pit = V12, rol = V13, tmp = V14, a1 = V15, checksum = V16)
 # 1   Month                            (1-12)
 # 2   Day                              (1-31)
@@ -23,8 +22,7 @@ sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6
 # 14   Temperature                      (degrees C)
 # 15   Analog input
 # 16   Checksum                         (1=failed)
-vhd = read.table("TESTDE02.vhd", header = FALSE, sep = "", dec = ".")
-dat = read.table("TESTDE02.dat", header = FALSE, sep = "", dec = ".")
+dat = read.table("MON103.dat", header = FALSE, sep = "", dec = ".")
 dat <- dat %>% rename(burst = V1, ensemble = V2, u = V3, v = V4, w = V5, amp1 = V6, amp2 = V7, amp3 = V8, snr1 = V9, snr2 = V10, snr3 = V11, corr1 = V12, corr2 = V13, corr3 = V14, p_dbar = V15, a1 = V16, a2 = V17, checksum = V18)
 # 1   Burst counter
 # 2   Ensemble counter                 (1-65536)
@@ -44,6 +42,8 @@ dat <- dat %>% rename(burst = V1, ensemble = V2, u = V3, v = V4, w = V5, amp1 = 
 # 16   Analog input 1
 # 17   Analog input 2
 # 18   Checksum                         (1=failed)
+#pck = read.table("MON103.pck", header = FALSE, sep = "", dec = ".")
+#vhd = read.table("MON103.vhd", header = FALSE, sep = "", dec = ".")
 sampling_rate = 64 # Hz, verify sampling rate in .hdr file under User setup
 
 # Data check
@@ -107,19 +107,24 @@ for (i in 1:nrow(sen)) {
 }
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], u_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "u (m/s)", xlab = "")
-plot(datetime[,2], v_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "v (m/s)", xlab = "")
-plot(datetime[,2], w_ave[,1], ylim = c(-0.3, 0.3), xlim = c(56700, 57000), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
+plot(datetime[,2], u_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type = "l",ylab = "u (m/s)", xlab = "")
+plot(datetime[,2], v_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "v (m/s)", xlab = "")
+plot(datetime[,2], w_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], uu, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uu", xlab = "")
-plot(datetime[,2], vv, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "vv", xlab = "")
-plot(datetime[,2], ww, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "ww", xlab = "Time (s)")
+plot(datetime[,2], uu, ylim = c(0, 0.2), xlim = c(71000, 72200), type = "l", ylab = "uu", xlab = "")
+plot(datetime[,2], vv, ylim = c(0, 0.5), xlim = c(71000, 72200), type = "l", ylab = "vv", xlab = "")
+plot(datetime[,2], ww, ylim = c(0, 0.5), xlim = c(71000, 72200), type = "l", ylab = "ww", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], uv, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uv", xlab = "")
-plot(datetime[,2], uw, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "uw", xlab = "")
-plot(datetime[,2], vw, ylim = c(-0.1, 0.1), xlim = c(56700, 57000), type = "l", ylab = "vw", xlab = "Time (s)")
+plot(datetime[,2], uv, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "uv", xlab = "")
+plot(datetime[,2], uw, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "uw", xlab = "")
+plot(datetime[,2], vw, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "vw", xlab = "Time (s)")
+
+# Spectra
+match(71450,datetime[,2])
+match(71890,datetime[,2])
+hist(vv[366:806,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(0,1.5), ylab = "count", xlab = "v'v'", main = "")
 
 
 
