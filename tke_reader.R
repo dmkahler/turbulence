@@ -3,7 +3,7 @@
 library(dplyr)
 library(ggplot2)
 
-setwd("/Users/davidkahler/Documents/Hydrology_and_WRM/river_and_lake_mixing/ADV data/")
+setwd("/Users/davidkahler/Documents/Hydrology_and_WRM/river_and_lake_mixing/ADV_data/")
 sen = read.table("MON103.sen", header = FALSE, sep = "", dec = ".")
 sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6, err = V7, sta = V8, bat = V9, ssp = V10, hed = V11, pit = V12, rol = V13, tmp = V14, a1 = V15, checksum = V16)
 # 1   Month                            (1-12)
@@ -109,22 +109,25 @@ for (i in 1:nrow(sen)) {
 par(mfrow = c(3,1), mar = c(4,4,2,2))
 plot(datetime[,2], u_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type = "l",ylab = "u (m/s)", xlab = "")
 plot(datetime[,2], v_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "v (m/s)", xlab = "")
-plot(datetime[,2], w_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
+plot(datetime[,2], w_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
 plot(datetime[,2], uu, ylim = c(0, 0.2), xlim = c(71000, 72200), type = "l", ylab = "uu", xlab = "")
-plot(datetime[,2], vv, ylim = c(0, 0.5), xlim = c(71000, 72200), type = "l", ylab = "vv", xlab = "")
-plot(datetime[,2], ww, ylim = c(0, 0.5), xlim = c(71000, 72200), type = "l", ylab = "ww", xlab = "Time (s)")
+plot(datetime[,2], vv, ylim = c(0, 1), xlim = c(71000, 72200), type = "l", ylab = "vv", xlab = "")
+plot(datetime[,2], ww, ylim = c(0, 1), xlim = c(71000, 72200), type = "l", ylab = "ww", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], uv, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "uv", xlab = "")
-plot(datetime[,2], uw, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "uw", xlab = "")
-plot(datetime[,2], vw, ylim = c(-0.1, 0.1), xlim = c(71000, 72200), type = "l", ylab = "vw", xlab = "Time (s)")
+plot(datetime[,2], uv, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "uv", xlab = "")
+plot(datetime[,2], uw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "uw", xlab = "")
+plot(datetime[,2], vw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "vw", xlab = "Time (s)")
 
 # Spectra
 match(71450,datetime[,2])
 match(71890,datetime[,2])
-hist(vv[366:806,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(0,1.5), ylab = "count", xlab = "v'v'", main = "")
+par(mfrow = c(3,1), mar = c(4,4,2,2))
+hist(vv[366:806,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,10000), xlim = c(0,3), ylab = "v'v'", xlab = "", main = "")
+hist(uv[366:806,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'v'", xlab = "", main = "")
+hist(vw[366:806,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "v'w'", xlab = "", main = "")
 
 # testing commit
 
