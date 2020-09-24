@@ -1,5 +1,8 @@
 # This code analyzes the data from the Nortek Vector ADV.
 
+# to install the needed packages, run the following lines:
+#install.packages("dplyr")
+#install.packages("ggplot2")
 library(dplyr)
 library(ggplot2)
 
