@@ -25,7 +25,10 @@ sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6
 # 14   Temperature                      (degrees C)
 # 15   Analog input
 # 16   Checksum                         (1=failed)
-dat = read.table("MON103.dat", header = FALSE, sep = "", dec = ".")
+dat <- read.table("MON103.dat", header = FALSE, sep = "", dec = ".")
+# or
+# x <- file.choose()
+# dat <- read.table(x, header = FALSE, sep = "", dec = ".")
 dat <- dat %>% rename(burst = V1, ensemble = V2, u = V3, v = V4, w = V5, amp1 = V6, amp2 = V7, amp3 = V8, snr1 = V9, snr2 = V10, snr3 = V11, corr1 = V12, corr2 = V13, corr3 = V14, p_dbar = V15, a1 = V16, a2 = V17, checksum = V18)
 # 1   Burst counter
 # 2   Ensemble counter                 (1-65536)
@@ -114,6 +117,12 @@ plot(datetime[,2], u_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type 
 plot(datetime[,2], v_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "v (m/s)", xlab = "")
 plot(datetime[,2], w_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
 
+# to zoom in on an area of interest, find indices:
+start <- which(datetime[,2]==71450)
+stop <- which(datetime[,2]==72000)
+dt_zoom <- datetime[start:stop,2]
+u_ave_zoom <- u_ave[start:stop,1]
+
 par(mfrow = c(3,1), mar = c(4,4,2,2))
 plot(datetime[,2], uu, ylim = c(0, 0.2), xlim = c(71000, 72200), type = "l", ylab = "uu", xlab = "")
 plot(datetime[,2], vv, ylim = c(0, 1), xlim = c(71000, 72200), type = "l", ylab = "vv", xlab = "")
@@ -125,12 +134,11 @@ plot(datetime[,2], uw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", 
 plot(datetime[,2], vw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "vw", xlab = "Time (s)")
 
 # Spectra
-match(71450,datetime[,2])
-match(71890,datetime[,2])
+start <- match(71450,datetime[,2])
+stop <- match(71890,datetime[,2])
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-hist(vv[366:806,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,10000), xlim = c(0,3), ylab = "v'v'", xlab = "", main = "")
-hist(uv[366:806,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'v'", xlab = "", main = "")
-hist(vw[366:806,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "v'w'", xlab = "", main = "")
+hist(vv[start:stop,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,10000), xlim = c(0,3), ylab = "v'v'", xlab = "", main = "")
+hist(uv[start:stop,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'v'", xlab = "", main = "")
+hist(vw[start:stop,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "v'w'", xlab = "", main = "")
 
-# testing commit
 
