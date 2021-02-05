@@ -7,7 +7,9 @@ library(dplyr)
 library(ggplot2)
 
 setwd("/Users/davidkahler/Documents/Hydrology_and_WRM/river_and_lake_mixing/ADV_data/")
-sen = read.table("MON103.sen", header = FALSE, sep = "", dec = ".")
+fh <- "chartiers1" # filename header
+fn_sen <- paste(fh, "sen", sep = ".")
+sen <- read.table(fn_sen, header = FALSE, sep = "", dec = ".")
 sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6, err = V7, sta = V8, bat = V9, ssp = V10, hed = V11, pit = V12, rol = V13, tmp = V14, a1 = V15, checksum = V16)
 # 1   Month                            (1-12)
 # 2   Day                              (1-31)
@@ -25,7 +27,8 @@ sen <- sen %>% rename(mon = V1, day = V2, yea = V3, hou = V4, mnt = V5, sec = V6
 # 14   Temperature                      (degrees C)
 # 15   Analog input
 # 16   Checksum                         (1=failed)
-dat <- read.table("MON103.dat", header = FALSE, sep = "", dec = ".")
+fn_dat <- paste(fh, "dat", sep = ".")
+dat <- read.table(fn_dat, header = FALSE, sep = "", dec = ".")
 # or
 # x <- file.choose()
 # dat <- read.table(x, header = FALSE, sep = "", dec = ".")
@@ -53,8 +56,12 @@ dat <- dat %>% rename(burst = V1, ensemble = V2, u = V3, v = V4, w = V5, amp1 = 
 sampling_rate = 64 # Hz, verify sampling rate in .hdr file under User setup
 
 # Data check
-max(dat$checksum)
-par(mfrow = c(3,1), mar = c(4,4,2,2)) # mfrow=c(nrows, ncols), https://www.statmethods.net/advgraphs/layout.html
+records <- nrow(dat)
+seconds <- nrow(sen)
+top_samples <- seconds*sampling_rate # this is the number of records that there would be if every second had all of the sampling rate's elements filled in, the value should not exceed this.
+numbers <- ((records<=top_samples)&&(records>(top_samples-(2*sampling_rate)))) # we allow twice the values to account for missing values at the first second and the last second.
+error_checksum <- max(dat$checksum) # If there are any errors recorded, this will be = 1
+par(mfrow = c(3,1), mar = c(6,6,3,3)) # mfrow=c(nrows, ncols), https://www.statmethods.net/advgraphs/layout.html
 hist(dat$snr1, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 1", xlab = "", main = "")
 hist(dat$snr2, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 2", xlab = "", main = "")
 hist(dat$snr3, breaks = c(-100,0,5,10,15,20,25,30,35,40,45,50,55,60,100), xlim = c(0,60), ylab = "Beam 3", xlab = "Signal-to-Noise Ratio (dB)", main = "")
@@ -112,10 +119,11 @@ for (i in 1:nrow(sen)) {
       }
 }
 
-par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], u_ave[,1], ylim = c(-0.5, 0.5), xlim = c(71000, 72200), type = "l",ylab = "u (m/s)", xlab = "")
-plot(datetime[,2], v_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "v (m/s)", xlab = "")
-plot(datetime[,2], w_ave[,1], ylim = c(-0.5, 1), xlim = c(71000, 72200), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
+par(mfrow = c(3,1), mar = c(6,6,3,3))
+# REM: x-axis is datetime range
+plot(datetime[,2], u_ave[,1], ylim = c(-0.5, 0.5), xlim = c(77250, 77500), type = "l",ylab = "u (m/s)", xlab = "")
+plot(datetime[,2], v_ave[,1], ylim = c(-0.5, 1), xlim = c(77250, 77500), type = "l",ylab = "v (m/s)", xlab = "")
+plot(datetime[,2], w_ave[,1], ylim = c(-1, 1), xlim = c(77250, 77500), type = "l",ylab = "w (m/s)", xlab = "Time (s)")
 
 # to zoom in on an area of interest, find indices:
 start <- which(datetime[,2]==71450)
@@ -124,9 +132,9 @@ dt_zoom <- datetime[start:stop,2]
 u_ave_zoom <- u_ave[start:stop,1]
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], uu, ylim = c(0, 0.2), xlim = c(71000, 72200), type = "l", ylab = "uu", xlab = "")
-plot(datetime[,2], vv, ylim = c(0, 1), xlim = c(71000, 72200), type = "l", ylab = "vv", xlab = "")
-plot(datetime[,2], ww, ylim = c(0, 1), xlim = c(71000, 72200), type = "l", ylab = "ww", xlab = "Time (s)")
+plot(datetime[,2], uu, ylim = c(0, 0.2), xlim = c(77250, 77500), type = "l", ylab = "uu", xlab = "")
+plot(datetime[,2], vv, ylim = c(0, 1), xlim = c(77250, 77500), type = "l", ylab = "vv", xlab = "")
+plot(datetime[,2], ww, ylim = c(0, 1), xlim = c(77250, 77500), type = "l", ylab = "ww", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
 plot(datetime[,2], uv, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "uv", xlab = "")
