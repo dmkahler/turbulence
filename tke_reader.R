@@ -137,16 +137,16 @@ plot(datetime[,2], vv, ylim = c(0, 1), xlim = c(77250, 77500), type = "l", ylab 
 plot(datetime[,2], ww, ylim = c(0, 1), xlim = c(77250, 77500), type = "l", ylab = "ww", xlab = "Time (s)")
 
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-plot(datetime[,2], uv, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "uv", xlab = "")
-plot(datetime[,2], uw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "uw", xlab = "")
-plot(datetime[,2], vw, ylim = c(-0.3, 0.3), xlim = c(71000, 72200), type = "l", ylab = "vw", xlab = "Time (s)")
+plot(datetime[,2], uv, ylim = c(-0.3, 0.3), xlim = c(77250, 77500), type = "l", ylab = "uv", xlab = "")
+plot(datetime[,2], uw, ylim = c(-0.3, 0.3), xlim = c(77250, 77500), type = "l", ylab = "uw", xlab = "")
+plot(datetime[,2], vw, ylim = c(-0.3, 0.3), xlim = c(77250, 77500), type = "l", ylab = "vw", xlab = "Time (s)")
 
 # Spectra
-start <- match(71450,datetime[,2])
-stop <- match(71890,datetime[,2])
+start <- match(77300,datetime[,2])
+stop <- match(77340,datetime[,2])
 par(mfrow = c(3,1), mar = c(4,4,2,2))
-hist(vv[start:stop,1], breaks = c(-10000,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,10000), xlim = c(0,3), ylab = "v'v'", xlab = "", main = "")
-hist(uv[start:stop,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'v'", xlab = "", main = "")
-hist(vw[start:stop,1], breaks = c(-10000,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,10000), xlim = c(-1.5,1.5), ylab = "v'w'", xlab = "", main = "")
+hist(uv[start:stop,1], breaks = c(-10000,-1.5,-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'v'", xlab = "", main = "")
+hist(uw[start:stop,1], breaks = c(-10000,-1.5,-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,1.5,10000), xlim = c(-1.5,1.5), ylab = "u'w'", xlab = "", main = "")
+hist(vw[start:stop,1], breaks = c(-10000,-1.5,-0.1,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,1.5,10000), xlim = c(-1.5,1.5), ylab = "v'w'", xlab = "", main = "")
 
 
