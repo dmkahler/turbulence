@@ -84,7 +84,7 @@ uw <- uu
 vw <- uu
 for (i in 1:nrow(sen)) {
       datetime[i,1] <- ( as.numeric(as.Date(paste(sen$yea[i], sen$mon[i], sen$day[i], sep = " "), format = "%Y %m %d")) - as.numeric(as.Date("2019 12 31", format = "%Y %m %d")) )
-      datetime[i,2] <- sen$sec[i] + (sen$mnt[i]-1)*60 + (sen$hou[i]-1)*3600
+      datetime[i,2] <- sen$sec[i] + (sen$mnt[i])*60 + (sen$hou[i])*3600
       for (j in 1:sampling_rate) {
             dat_index <- (sampling_rate*(i-1)) + j
             if (is.na(dat$u[dat_index])==FALSE) {
