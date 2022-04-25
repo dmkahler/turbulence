@@ -8,6 +8,7 @@
 
 library(readr)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(lubridate)
 library(latex2exp)
@@ -72,27 +73,6 @@ records <- nrow(dat)
 cover <- sampling_rate*nrow(sen) # manually compare this to records, should be close
 error_checksum <- max(dat$checksum) # If there are any errors recorded, this will be = 1
 
-## Check signal-to-noise ratio
-snr1 <- ggplot(dat,aes(x=snr1)) +
-     geom_histogram(breaks = (5*c(0:12)), color = "black", fill = "gray", na.rm = TRUE) +
-     ylab("Beam 1") + 
-     xlab(element_blank()) +
-     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
-     theme(axis.text = element_text(face = "plain", size = 12))
-snr2 <- ggplot(dat,aes(x=snr2)) +
-     geom_histogram(breaks = (5*c(0:12)), color = "black", fill = "gray", na.rm = TRUE) +
-     ylab("Beam 2") +
-     xlab(element_blank()) +
-     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
-     theme(axis.text = element_text(face = "plain", size = 12))
-snr3 <- ggplot(dat,aes(x=snr3)) +
-     geom_histogram(breaks = (5*c(0:12)), color = "black", fill = "gray", na.rm = TRUE) +
-     ylab("Beam 3") +
-     xlab("Signal-to-Noise Ratio (dB)") +
-     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
-     theme(axis.text = element_text(face = "plain", size = 12))
-snr_tot <- grid.arrange(snr1,snr2,snr3, nrow = 3) # SNR should be higher, but noise is common when out of water.  Compare improvement to next figure.
-
 ## CONVERT DATA ##
 dat$dt <- (c(1:records))/sampling_rate # time is defined as seconds after start, 
 dat$p_Pa <- 1e4*dat$p_dbar
@@ -103,6 +83,7 @@ en <- 1000*ceiling((under[(length(under)-(5*64))])/1000)
 dat2 <- dat[st:en,]
 
 ## Check signal-to-noise ratio
+# FIGURE 1
 snr1 <- ggplot(dat2,aes(x=snr1)) +
      geom_histogram(breaks = (5*c(0:12)), color = "black", fill = "gray", na.rm = TRUE) +
      ylab("Beam 1") + 
@@ -122,9 +103,10 @@ snr3 <- ggplot(dat2,aes(x=snr3)) +
      theme(panel.background = element_rect(fill = "white", colour = "black")) + 
      theme(axis.text = element_text(face = "plain", size = 12))
 snr_all <- grid.arrange(snr1,snr2,snr3, nrow = 3)
-ggsave("snr_all.eps", snr_tot, device = "eps", dpi = 72)
+ggsave("snr_all.eps", snr_all, device = "eps", dpi = 72)
 
 ## Big Profile
+# FIGURE 2
 uall <- ggplot(dat2) +
      geom_line(aes(x=dt,y=u)) +
      ylab("u (m/s)") +
@@ -143,59 +125,58 @@ wall <- ggplot(dat2) +
      xlab(element_blank()) +
      theme(panel.background = element_rect(fill = "white", colour = "black")) + 
      theme(axis.text = element_text(face = "plain", size = 12))
+guall <- ggplotGrob(uall)
+gvall <- ggplotGrob(vall)
+gwall <- ggplotGrob(wall)
+uvw <- grid::grid.draw(rbind(guall,gvall,gwall))
+ggsave("uvw.eps", uvw, device = "eps", dpi = 72)
+
+## Find depth changes
+n <- nrow(dat2)
+change <- 0.05*990*9.81 # establish the threshold for if the instrument is moving vertically = 5cm movement
+breaks <- array(NA, dim = n)
+j <- 1
+last.break <- -1 * sampling_rate
+for (i in sampling_rate:(n-sampling_rate)) {
+     fst <- mean(dat2$p_Pa[(i-63):i], na.rm = TRUE)
+     sec <- mean(dat2$p_Pa[i:(i+63)], na.rm = TRUE)
+     # dpdt[i] <- abs(sec-fst) # was for development, may delete this line
+     if ( (abs(sec-fst) > change) & (i > (last.break+(2*sampling_rate))) ) {
+          breaks[j] <- i
+          last.break <- i
+          j <- j + 1
+     }
+}
+breaks <- breaks[which(is.na(breaks)==FALSE)]
+breaks.time <- min(dat2$dt) + breaks/64
+
+# FIGURE 3
+snr_tab <- dat2 %>%
+     select(dt,snr1,snr2,snr3) %>%
+     pivot_longer(cols = c("snr1","snr2","snr3"), names_to = "beam", values_to = "snr")
+snr <- ggplot(snr_tab) +
+     geom_line(aes(x=dt, y=snr, color=beam)) +
+     ylab("Signal-to-Noise (dB)") +
+     theme(axis.title.x=element_blank(),
+           axis.text.x=element_blank()) +
+     theme(legend.position="top", legend.key = element_blank()) + 
+     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
+     theme(axis.text = element_text(face = "plain", size = 12))
 pall <- ggplot(dat2) +
      geom_line(aes(x=dt,y=(p_Pa/1000))) +
+     geom_vline(xintercept = breaks.time, color = "blue") +
      ylab("Pressure (kPa)") +
      xlab("Time (s)") +
      theme(panel.background = element_rect(fill = "white", colour = "black")) + 
      theme(axis.text = element_text(face = "plain", size = 12))
-guall <- ggplotGrob(uall)
-gvall <- ggplotGrob(vall)
-gwall <- ggplotGrob(wall)
+gsnr <- ggplotGrob(snr)
 gpall <- ggplotGrob(pall)
 grid::grid.newpage()
-uvwp <- grid::grid.draw(rbind(guall,gvall,gwall,gpall))
-ggsave("uvwp.eps", uvwp, device = "eps", dpi = 72)
+snrp <- grid::grid.draw(rbind(gsnr,gpall))
+ggsave("snrp.eps", snrp, device = "eps", dpi = 72)
 
-# average pressures
-pressure <- array(NA, dim = c(dur,sampling_rate))
-pres <- array(NA, dim = dur)
-temp <- pres
-dnst <- pres
-dept <- pres
-time <- pres
-for (i in 1:dur) {
-     for (j in 1:sampling_rate) {
-          pressure[i,j] <- dat$p_Pa[((i-1)*sampling_rate+j)]
-     }
-     pres[i] <- mean(pressure[i,])  # pressure (Pa)
-     temp[i] <- sen$tmp[i]          # temperature (C)
-     dnst[i] <- waterrho(temp[i])   # water density (kg/m^3)
-     time[i] <- as.numeric(sen$dt[i]) - start
-}
+## MANUAL SELECTION REQUIRED
 
-num <- 0                               # set index for breaks
-breaks <- array(0, dim = dur)          # preallocate a matrix to mark breaks
-for (i in 12:dur) {
-     ave_pres <- mean(pres[(i-11):(1-1)])
-     if ((pres[i] - pres[i-1]) > (10 * ave_pres)) {
-          num <- num + 1             # advance index
-          breaks[i] <- 1             # record break
-     }
-}
-
-loc <- data.frame(time,temp,pres,dnst) # time in seconds from start, temp in Celcius, pres in Pascals, dnst in N/m^3
-
-ggplot(loc) +
-     geom_line(aes(x=time, y=pres)) +
-     theme(panel.background = element_rect(fill = "white", colour = "black")) +
-     theme(aspect.ratio = 1) +
-     theme(axis.text = element_text(face = "plain", size = 12))
-
-## FIND ATMOSPHERIC PRESSURE
-
-base <- mean(loc$pres[1:10]) # pressure for the first 10 seconds in Pa
-b.sd <- stdev(loc$pres[1:10])
 
 
 
