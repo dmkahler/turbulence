@@ -141,7 +141,7 @@ for (i in sampling_rate:(n-sampling_rate)) {
      fst <- mean(dat2$p_Pa[(i-63):i], na.rm = TRUE)
      sec <- mean(dat2$p_Pa[i:(i+63)], na.rm = TRUE)
      # dpdt[i] <- abs(sec-fst) # was for development, may delete this line
-     if ( (abs(sec-fst) > change) & (i > (last.break+(2*sampling_rate))) ) {
+     if ( (abs(sec-fst) > change) & (i > (last.break+(5*sampling_rate))) ) {
           breaks[j] <- i
           last.break <- i
           j <- j + 1
@@ -176,7 +176,10 @@ snrp <- grid::grid.draw(rbind(gsnr,gpall))
 ggsave("snrp.eps", snrp, device = "eps", dpi = 72)
 
 ## MANUAL SELECTION REQUIRED
-
-
-
+duration <- array(NA, dim = (length(breaks.time)))
+for (i in 2:length(breaks.time)) {
+     duration[i] <- breaks.time[i] - breaks.time[i-1]
+}
+br <- data.frame(breaks,breaks.time,duration)
+br <- rename(br, index=breaks,time=breaks.time)
 
