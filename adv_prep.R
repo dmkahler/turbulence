@@ -240,6 +240,7 @@ depthuvw <- depths %>%
 dat2 <- dat2 %>%
      rename(save=u) %>% # saving to keep from overwriting
      mutate(u=-w) %>%
+     select(-w) %>% # remove before replacing
      rename(w=save)
 # Plotting
 depth.uvw <- ggplot(depthuvw) +
