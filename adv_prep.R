@@ -236,6 +236,12 @@ depthuvw <- depths %>%
      mutate(u=-wbar) %>%
      rename(v=vbar,w=ubar) %>%
      pivot_longer(cols = c("u","v","w"), names_to = "Direction", values_to = "Velocity")
+# TO KEEP dat2 UP-TO-DATE
+dat2 <- dat2 %>%
+     rename(save=u) %>% # saving to keep from overwriting
+     mutate(u=-w) %>%
+     rename(w=save)
+# Plotting
 depth.uvw <- ggplot(depthuvw) +
      geom_point(aes(x=Velocity, y=height, color=Direction)) +
      ylab("Height from bottom (m)") +
