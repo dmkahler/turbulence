@@ -135,7 +135,7 @@ rm(uall,vall,wall,guall,gvall,gwall)
 
 ## Find depth changes
 n <- nrow(dat2)
-change <- 0.05*990*9.81 # establish the threshold for if the instrument is moving vertically = 5cm movement
+change <- 0.05*997*9.81 # establish the threshold for if the instrument is moving vertically = 5cm movement
 breaks <- array(NA, dim = n)
 j <- 1
 last.break <- -1 * sampling_rate
@@ -213,16 +213,40 @@ for (i in 1:nrow(depths)) {
      depths$temp[i] <- mean(sen$tmp[srt:fsh], na.rm = TRUE)
      depths$pres[i] <- mean(dat2$p_Pa[depths$start.index[i]:depths$end.index[i]], na.rm = TRUE) - p_atm # Gage pressure in Pa
 }
-pres2depth <- depths[order(depths$pres),]
+depths <- depths[order(depths$pres),]
 g <- 9.81 # m/s^2, acceleration due to gravity
-rho <- waterrho(pres2depth$temp[1], unit = "C") # returns kg/m^3
-delta_P <- pres2depth$pres[1]
-pres2depth$depth[1] <- delta_P / (g*rho)
-for (i in 2:nrow(pres2depth)) {
-     rho <- waterrho(pres2depth$temp[i], unit = "C") # returns kg/m^3
-     delta_P <- pres2depth$pres[i] - pres2depth$pres[i-1]
-     pres2depth$depth[i] <- pres2depth$depth[i-1] + (delta_P / (g*rho))
+rho <- waterrho(depths$temp[1], unit = "C") # returns kg/m^3
+delta_P <- depths$pres[1]
+depths$depth[1] <- delta_P / (g*rho)
+for (i in 2:nrow(depths)) {
+     rho <- waterrho(depths$temp[i], unit = "C") # returns kg/m^3
+     delta_P <- depths$pres[i] - depths$pres[i-1]
+     depths$depth[i] <- depths$depth[i-1] + (delta_P / (g*rho))
 }
 
+## ADD average velocities
+for (i in 1:nrow(depths)) {
+     depths$ubar[i] <- mean(dat2$u[depths$start.index[i]:depths$end.index[i]], na.rm = TRUE)
+     depths$vbar[i] <- mean(dat2$v[depths$start.index[i]:depths$end.index[i]], na.rm = TRUE)
+     depths$wbar[i] <- mean(dat2$w[depths$start.index[i]:depths$end.index[i]], na.rm = TRUE)
+}
+depths$height <- (max(depths$depth) + 0.15) - depths$depth
+depthuvw <- depths %>%
+     select(height,ubar,vbar,wbar) %>%
+     mutate(u=-wbar) %>%
+     rename(v=vbar,w=ubar) %>%
+     pivot_longer(cols = c("u","v","w"), names_to = "Direction", values_to = "Velocity")
+depth.uvw <- ggplot(depthuvw) +
+     geom_point(aes(x=Velocity, y=height, color=Direction)) +
+     ylab("Height from bottom (m)") +
+     xlab("Velocity (m/s)") +
+     theme(legend.position="right", legend.key = element_blank(), 
+           legend.text = element_text(face = "plain", size = 12),
+           legend.title = element_text(face = "plain", size = 12)) + 
+     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
+     theme(aspect.ratio = 1) +
+     theme(axis.text = element_text(face = "plain", size = 12)) +
+     theme(axis.title = element_text(face = "plain", size = 12))
+ggsave("depth_v_uvw.eps", depth.uvw, device = "eps", dpi = 72)
 
 
