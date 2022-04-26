@@ -104,6 +104,7 @@ snr3 <- ggplot(dat2,aes(x=snr3)) +
      theme(axis.text = element_text(face = "plain", size = 12))
 snr_all <- grid.arrange(snr1,snr2,snr3, nrow = 3)
 ggsave("snr_all.eps", snr_all, device = "eps", dpi = 72)
+rm(snr1,snr2,snr3)
 
 ## Big Profile
 # FIGURE 2
@@ -130,6 +131,7 @@ gvall <- ggplotGrob(vall)
 gwall <- ggplotGrob(wall)
 uvw <- grid::grid.draw(rbind(guall,gvall,gwall))
 ggsave("uvw.eps", uvw, device = "eps", dpi = 72)
+rm(uall,vall,wall,guall,gvall,gwall)
 
 ## Find depth changes
 n <- nrow(dat2)
@@ -147,7 +149,7 @@ for (i in sampling_rate:(n-sampling_rate)) {
           j <- j + 1
      }
 }
-breaks <- breaks[which(is.na(breaks)==FALSE)]
+breaks <- breaks[which(is.na(breaks)==FALSE)] # INDEX OF dat2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 breaks.time <- min(dat2$dt) + breaks/64
 
 # FIGURE 3
@@ -174,12 +176,53 @@ gpall <- ggplotGrob(pall)
 grid::grid.newpage()
 snrp <- grid::grid.draw(rbind(gsnr,gpall))
 ggsave("snrp.eps", snrp, device = "eps", dpi = 72)
+rm(snr,pall,gsnr,gpall)
 
-## MANUAL SELECTION REQUIRED
+## IDENTIFY TIMES/INDEX
 duration <- array(NA, dim = (length(breaks.time)))
+start.index <- duration
+start.time <- duration
+end.index <- duration
+end.time <- duration
+elapsed <- duration
+buffer <- 2 # time in seconds removed from the start and end of each
+j <- 1
 for (i in 2:length(breaks.time)) {
      duration[i] <- breaks.time[i] - breaks.time[i-1]
+     if (duration[i] >= 59) {
+          start.index[j] <- breaks[i-1] + (buffer * sampling_rate)
+          start.time[j] <- breaks.time[i-1] + buffer
+          end.index[j] <- breaks[i] - (buffer * sampling_rate)
+          end.time[j] <- breaks.time[i] - buffer
+          elapsed[j] <- duration[i] - (2 * buffer)
+          j <- j + 1
+     }
 }
-br <- data.frame(breaks,breaks.time,duration)
-br <- rename(br, index=breaks,time=breaks.time)
+start.index <- start.index[which(is.na(start.index)==FALSE)]
+start.time <- start.time[which(is.na(start.time)==FALSE)]
+end.index <- end.index[which(is.na(end.index)==FALSE)]
+end.time <- end.time[which(is.na(end.time)==FALSE)]
+elapsed <- elapsed[which(is.na(elapsed)==FALSE)]
+depths <- data.frame(start.index,end.index,start.time,end.time,elapsed)
+rm(breaks,breaks.time,duration,start.index,start.time,end.index,end.time,elapsed)
+
+## FIND TEMPERATURE AND DEPTH
+for (i in 1:nrow(depths)) {
+     srt <- ceiling(depths$start.time[i])
+     fsh <- floor(depths$end.time[i])
+     depths$temp[i] <- mean(sen$tmp[srt:fsh], na.rm = TRUE)
+     depths$pres[i] <- mean(dat2$p_Pa[depths$start.index[i]:depths$end.index[i]], na.rm = TRUE) - p_atm # Gage pressure in Pa
+}
+pres2depth <- depths[order(depths$pres),]
+g <- 9.81 # m/s^2, acceleration due to gravity
+rho <- waterrho(pres2depth$temp[1], unit = "C") # returns kg/m^3
+delta_P <- pres2depth$pres[1]
+pres2depth$depth[1] <- delta_P / (g*rho)
+for (i in 2:nrow(pres2depth)) {
+     rho <- waterrho(pres2depth$temp[i], unit = "C") # returns kg/m^3
+     delta_P <- pres2depth$pres[i] - pres2depth$pres[i-1]
+     pres2depth$depth[i] <- pres2depth$depth[i-1] + (delta_P / (g*rho))
+}
+
+
 
