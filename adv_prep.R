@@ -129,6 +129,7 @@ wall <- ggplot(dat2) +
 guall <- ggplotGrob(uall)
 gvall <- ggplotGrob(vall)
 gwall <- ggplotGrob(wall)
+grid::grid.newpage()
 uvw <- grid::grid.draw(rbind(guall,gvall,gwall))
 ggsave("uvw.eps", uvw, device = "eps", dpi = 72)
 rm(uall,vall,wall,guall,gvall,gwall)
