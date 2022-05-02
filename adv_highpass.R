@@ -30,22 +30,25 @@ for (i in 1:nrow(depths)) {
           theme(axis.text = element_text(face = "plain", size = 12))
      vp <- ggplot(uvec) +
           geom_line(aes(x=dt,y=vprime)) +
-          ylab("v (m/s)") +
+          ylab("v' (m/s)") +
           xlab(element_blank()) +
           theme(panel.background = element_rect(fill = "white", colour = "black")) + 
           theme(axis.text = element_text(face = "plain", size = 12))
      wp <- ggplot(uvec) +
           geom_line(aes(x=dt,y=wprime)) +
-          ylab("w (m/s)") +
+          ylab("w' (m/s)") +
           xlab("Time (s)") +
           theme(panel.background = element_rect(fill = "white", colour = "black")) + 
           theme(axis.text = element_text(face = "plain", size = 12))
      gup <- ggplotGrob(up)
      gvp <- ggplotGrob(vp)
      gwp <- ggplotGrob(wp)
+     setEPS() # https://www.geeksforgeeks.org/export-plot-to-eps-file-in-r/
+     postscript(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))))
      grid::grid.newpage()
      uvwprimes <- grid::grid.draw(rbind(gup,gvp,gwp))
-     ggsave(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))),".eps", uvwprimes, device = "eps", dpi = 72)
+     #ggsave(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))),".eps", uvwprimes, device = "eps", dpi = 72)
+     dev.off()
 }
 
 
