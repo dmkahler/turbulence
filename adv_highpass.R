@@ -2,10 +2,12 @@
 
 library(dplyr)
 library(ggplot2)
+library(doParallel)
 
 # Run adv_prep.R first.  Uses dat2 and depths, specifically
 
-for (i in 1:nrow(depths)) {
+registerDoParallel(detectCores())
+rst <- foreach (i = 1:nrow(depths), .combine = rbind) %dopar% {
      # Determine u', v', w'
      h <- depths$height[i]
      d <- depths$depth[i]
@@ -57,6 +59,7 @@ for (i in 1:nrow(depths)) {
           y = -0.5,
           label = paste0("u'w'=",upwp_bar)
      )
+     #depths$upwp_bar[i] <- upwp_bar # removed due to parallel, replacing at end of parallel loop
      RS <- ggplot(uvec) +
           geom_point(aes(x=uprime,y=wprime)) +
           xlim(c(-0.5,0.5)) +
@@ -70,4 +73,16 @@ for (i in 1:nrow(depths)) {
           theme(axis.text = element_text(face = "plain", size = 12)) +
           theme(axis.title = element_text(face = "plain", size = 12))
      ggsave(paste0("uw_prime.i",as.character(i),".h",as.character(round(h, digits = 4)),".eps"), RS, device = "eps")
+     
+     print(c(i,upwp_bar)) # outputs to parallel output, rst, for Reynolds stress tensor
 }
+
+rst <- rst[order(rst[,1]),]
+depths$upwp <- rst[,2]
+
+
+
+
+
+
+
