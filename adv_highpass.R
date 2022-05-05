@@ -49,19 +49,25 @@ for (i in 1:nrow(depths)) {
      grid::grid.draw(rbind(gup,gvp,gwp))
      #ggsave(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))),".eps", uvwprimes, device = "eps", dpi = 72)
      dev.off()
+     
+     uvec$upwp_bar <- uvec$uprime*uvec$wprime
+     upwp_bar <- mean(uprime*wprime, na.rm = TRUE)
+     annotation <- data.frame(
+          x = -0.2,
+          y = -0.5,
+          label = paste0("u'w'=",upwp_bar)
+     )
+     RS <- ggplot(uvec) +
+          geom_point(aes(x=uprime,y=wprime)) +
+          xlim(c(-0.5,0.5)) +
+          xlab("u'") +
+          ylim(c(-0.5,0.5)) +
+          ylab("w'") +
+          geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                    color="blue") +
+          theme(panel.background = element_rect(fill = "white", colour = "black")) + 
+          theme(aspect.ratio = 1) +
+          theme(axis.text = element_text(face = "plain", size = 12)) +
+          theme(axis.title = element_text(face = "plain", size = 12))
+     ggsave(paste0("uw_prime.i",as.character(i),".h",as.character(round(h, digits = 4)),".eps"), RS, device = "eps")
 }
-
-
-
-ggplot(uvec) +
-     geom_point(aes(x=uprime,y=wprime)) +
-     xlim(c(-0.5,0.5)) +
-     xlab("u'") +
-     ylim(c(-0.5,0.5)) +
-     ylab("w'") +
-     theme(panel.background = element_rect(fill = "white", colour = "black")) + 
-     theme(aspect.ratio = 1) +
-     theme(axis.text = element_text(face = "plain", size = 12)) +
-     theme(axis.title = element_text(face = "plain", size = 12))
-
-
