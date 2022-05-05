@@ -44,9 +44,9 @@ for (i in 1:nrow(depths)) {
      gvp <- ggplotGrob(vp)
      gwp <- ggplotGrob(wp)
      setEPS() # https://www.geeksforgeeks.org/export-plot-to-eps-file-in-r/
-     postscript(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))))
+     postscript(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4)),".eps"))
      grid::grid.newpage()
-     uvwprimes <- grid::grid.draw(rbind(gup,gvp,gwp))
+     grid::grid.draw(rbind(gup,gvp,gwp))
      #ggsave(paste0("uvw_prime.i",as.character(i),".h",as.character(round(h, digits = 4))),".eps", uvwprimes, device = "eps", dpi = 72)
      dev.off()
 }
