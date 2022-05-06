@@ -119,7 +119,7 @@ rst <- foreach (i = 1:nrow(depths), .combine = rbind) %dopar% {
      setEPS() # https://www.geeksforgeeks.org/export-plot-to-eps-file-in-r/
      postscript(paste0("uw_prime.ts.i",as.character(i),".h",as.character(round(h, digits = 4)),".eps"))
      grid::grid.newpage()
-     grid::grid.draw(rbind(gup,gvp,gwp))
+     grid::grid.draw(rbind(gup,gwp))
      dev.off()
      
      # Calculate u'w' averaged over the ensemble 
@@ -140,7 +140,7 @@ rst <- foreach (i = 1:nrow(depths), .combine = rbind) %dopar% {
      
      RS <- ggplot(uvec) +
           geom_point(aes(x=uprime,y=wprime)) +
-          geom_point(aes(x=u.ifft,y=w.ifft),color="blue") +
+          geom_point(aes(x=u.ifft,y=w.ifft),linetype="dashed",color="blue") +
           xlim(c(-0.5,0.5)) +
           xlab("u'") +
           ylim(c(-0.5,0.5)) +
@@ -158,7 +158,7 @@ rst <- foreach (i = 1:nrow(depths), .combine = rbind) %dopar% {
 
 rst <- rst[order(rst[,1]),]
 depths$upwp <- rst[,2]
-
+depths$upwp_filtered <- rst[,3]
 
 
 
